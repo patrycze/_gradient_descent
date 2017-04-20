@@ -8,47 +8,59 @@ xk = 5;
 yp = -5;
 yk = 5;
 e = 0.001
-func = @(x,y) x.^2 + y.^2
+func = @(x,y) x.^2 + y.^2;
 [x,y] = meshgrid([xp:1:xk],[yp:1:yk]);
-z = @(x,y)  x.^2 + y.^2
-subplot(2,1,1)
-mesh(x,y,z(x,y)) %surf, surfl, plot3
+z = @(x,y)  x.^2 + y.^2;
+subplot(2,1,1);
+mesh(x,y,z(x,y)); %surf, surfl, plot3
 
-colormap(hot)  %zmiana koloru
-subplot(2,1,2)
+colormap(hot) ; %zmiana koloru
+subplot(2,1,2);
 
-contour(x,y,z(x,y))
+contour(x,y,z(x,y));
 title('Metoda Wspó³czynników')
 
 %% obliczanie wartosci funkcji celu
 %f = func(4,4)
-syms x
-syms y
-syms a
+syms x;
+syms y;
+syms a;
 i = 2;
 syms pocz;
 pocz = [-3; 3]
-% punkt pocz¹tkowy
-%d1 = [1, 0; 0, 1]
-%while func(pocz(1,i), pocz(2,i)) <= func(pocz(1,i-1), pocz(2,i-1))
-%d1 = [1;0];
-%d2 = [0;1];
-%%% minimalizajca w kierunku d z wykladu
-krok = 1
+
+%pomoc gradient 
+
 % obliczanie pochodnej po y 
-py = diff(func,y)
+py = diff(func,y);
 % obliczanie pochodnej po x 
-px = diff(func,x)
+px = diff(func,x);
 syms temp;
 syms temp1;
-gradient = [px;py]
+gradient = [px;py];
+
+krok = 1;
+i = 1;
+funkcja_gradientu = matlabFunction(gradient(1,i))
+pocz(1,i)
+wartosci_gradientu = funkcja_gradientu(pocz(1,i))
+
+while(funkcja_gradientu(pocz(1,i)) < 0.01)
+ 
+% obliczanie pochodnej po y 
+py = diff(func,y);
+% obliczanie pochodnej po x 
+px = diff(func,x);
+syms temp;
+syms temp1;
+gradient = [px;py];
 
 %obliczanie normy euklidesowej 
 dlugosc_gradientu = size(gradient);
-dlugosc_gradientu(2)
-gradient(1,1)^2
-temp = 0
-temp1 = 0
+dlugosc_gradientu(2);
+gradient(1,1)^2;
+temp = 0;
+temp1 = 0;
 for i = 1:dlugosc_gradientu-1
     temp = temp + gradient(1,i)^2;
     temp1 = temp1 + gradient(2,i)^2;
@@ -63,8 +75,17 @@ pocz
 alfa
 gradient
 
-raoko = pocz(1) - alfa(1,1) * gradient(1,1) %% musze pod to podstawiæ x 
-raoko2 = pocz(2) - alfa(2,1) * gradient(2,1)
+rozwiazaniex = pocz(1) - alfa(1,1) * gradient(1,1) %% musze pod to podstawiæ x 
+rozwiazaniey = pocz(2) - alfa(2,1) * gradient(2,1) 
+
+funkcjax = matlabFunction(rozwiazaniex);
+funkcjay = matlabFunction(rozwiazaniey); %% konwersja z wektora na 
+pocz =[pocz [funkcjax(pocz(1,1)); funkcjax(pocz(2,1))]]
+
+%dla nowych punktów obliczanie gradientu do sprawdzenia warunku
+funkcja_gradientu = matlabFunction(gradient(1,i))
+i = i+1
+end
 
 % https://www.youtube.com/watch?v=sXUf5kx2Gi8&t=200s
 
