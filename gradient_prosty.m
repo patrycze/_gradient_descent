@@ -1,93 +1,226 @@
-clc
-close
-clear
+function [i,pocz, rozwiazanie] = gradient_prosty(funcj, xp, xk, yp, yk, px,py)
+
+func = str2func(['@(x,y)',funcj]);
+
 tic
 
-xp = -5;
-xk = 5;
-yp = -5;
-yk = 5;
+%xp = -2;
+%xk = 2;
+%yp = -1;
+%yk = 3;
 
-func = @(x,y) x.^2 + y.^2;
-[x,y] = meshgrid([xp:1:xk],[yp:1:yk]);
-z = @(x,y)  x.^2 + y.^2;
-subplot(2,1,1);
-mesh(x,y,z(x,y)); %surf, surfl, plot3
+func = @(x,y) x.*((e.^(-a1.*x)-e.^(-a2.*x))-(e.^(-x)-(e.^(-10*x))))
 
-colormap(hot) ; %zmiana koloru
-subplot(2,1,2);
+%func = @(x,y) 2.*x.^2 + y.^2 + x - y;
+%func = @(x,y) x.^2 + y.^2;
+%func = @(x,y) 100*(y-x.^2).^2+(1-x).^2
+%func = @(x,y) -cos(x).*cos(y).*(exp(-((x-pi).^2+(y-pi).^2)))
+z = func;              
+[x,y] = meshgrid([xp:0.1:xk],[yp:0.1:yk]);
+%z = @(x,y)  2.*x.^2 + y.^2 + x - y;
+%z = @(x,y) x.^2 + y.^2
+%z = @(x,y) 100*(y-x.^2).^2+(1-x).^2
+%z = @(x,y) -cos(x).*cos(y).*(exp(-((x-pi).^2+(y-pi).^2)))
+%subplot(2,1,1);
+%mesh(x,y,z(x,y)); %surf, surfl, plot3
 
-contour(x,y,z(x,y));
-title('Metoda Wspó³czynników')
+%colormap(hot) ; %zmiana koloru
+%subplot(2,1,2);
+
+%contour(x,y,z(x,y));
+%title('Metoda Wspó³czynników')
 
 %% obliczanie wartosci funkcji celu
-%f = x.^2 + y.^2;
-syms x;
-syms y;
+
+
 syms a;
-syms pocz;
-pocz = [0.1; 1]
+%syms pocz;
+
+pocz = [px; py]
 
 %pomoc gradient 
-
+wektortestowy = []
 % obliczanie pochodnej po y 
-py = diff(func,y);
-% obliczanie pochodnej po x 
-px = diff(func,x);
 syms temp;
 syms temp1;
 temp = 0;
 temp1 = 0;
-gradient = [px;py];
 norma = []
 alfa = []
-krok = 1;
+krok = 0.7;
 i = 1;
-
-funkcja_gradientu = matlabFunction(gradient)
-pocz(1,i)
-wartosci_gradientu = funkcja_gradientu(pocz(1,i),pocz(2,i))
-
-while(abs(funkcja_gradientu(pocz(1,i),pocz(2,i))) > 0.001)
-%obliczanie normy euklidesowej 
-dlugosc_gradientu = size(gradient);
-
-%for j = 1:dlugosc_gradientu(2)-1
-    temp = temp + gradient(1,1)^2
-    temp1 = temp1 + gradient(2,1)^2
-%end 
-%temp = sqrt(temp)
-%temp1 = sqrt(temp1)
-
-norma = [norma [sqrt(temp); sqrt(temp1)]]
-alfa = [alfa [krok/norma(1,i); krok/norma(2,i)]]
-
-pocz
-alfa
-gradient
-
-rozwiazaniex = pocz(1,i) - alfa(1,i) * gradient(1,1) %% musze pod to podstawiæ x 
-rozwiazaniey = pocz(2,i) - alfa(2,i) * gradient(2,1) 
-
-funkcjax = matlabFunction(rozwiazaniex);
-funkcjay = matlabFunction(rozwiazaniey); %% konwersja z wektora na
-
-pocz =[pocz [funkcjax(pocz(1,i)); funkcjay(pocz(2,i))]]
-
-%dla nowych punktów obliczanie gradientu do sprawdzenia warunku
-
-funkcja_gradientu = matlabFunction(gradient)
-
-% obliczanie pochodnej po y 
-px = diff(rozwiazaniex,x);
+func(pocz(1,i),pocz(2,i))
+%py = diff(func,y);
 % obliczanie pochodnej po x 
-py = diff(rozwiazaniey,y);
+%px = diff(func,x);
+syms x;
+syms y;
+gradient = []
+%gradient = [px;py];
+%obliczanie normy euklidesowej 
+%gradient = matlabFunction(gradient);
+%abs(gradF(func,pocz(1,i),pocz(2,i)))
+%while(abs(gradF(func,pocz(1,i),pocz(2,i))) > 0.001)
+while(krok > 0.001)
+[X, Y] = gradF(func,pocz(1,i),pocz(2,i));
+nablaT = [X,Y];
+nabla = [X,Y].';
 
-gradient = [px;py];
+alfa = [krok/sqrt(nablaT*nabla)];
+
+rozwiazanie = pocz(:,i) - (alfa * nabla);
+func(rozwiazanie(1),rozwiazanie(2));
+
+  
+if(func(rozwiazanie(1),rozwiazanie(2))>func(pocz(1,i),pocz(2,i)))
+        
+  x = pocz(1,i)+krok;
+  y = pocz(2,i);
+  wektortestowy = [wektortestowy; func(x,y), pocz(1,i)+krok, pocz(2,i)];
+  
+  x = pocz(1,i);
+  y = pocz(2,i) + krok;
+  %f3 = func(x,y);
+  wektortestowy = [wektortestowy; func(x,y), pocz(1,i), pocz(2,i)+krok];
+  
+  x = pocz(1,i)-krok;
+  y = pocz(2,i);
+  %f4= func(x, y);
+  wektortestowy = [wektortestowy; func(x,y), pocz(1,i)-krok, pocz(2,i)];
+  
+  x = pocz(1,i);
+  y = pocz(2,i)-krok;
+  %f5 = func(x, y);
+  wektortestowy = [wektortestowy; func(x,y), pocz(1,i), pocz(2,i)-krok];
+  
+  % NIBY NA SKOS %%%%na poludniowy zachod%%%%%%%%%%%%%%%%%%%%%
+  
+  x = pocz(1,i)+krok;
+  y = pocz(2,i)-krok;
+  %f6 = func(x, y);
+  wektortestowy = [wektortestowy; func(x,y), pocz(1,i)+krok, pocz(2,i)-krok];
+  
+  %%%%%%skos na polnocny zachod%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  
+  
+  x = pocz(1,i)+krok;
+  y = pocz(2,i)+krok;
+  %f7 = func(x, y);
+  wektortestowy = [wektortestowy; func(x,y), pocz(1,i)+krok, pocz(2,i)+krok];
+  
+  x = pocz(1,i)-krok;
+  y = pocz(2,i)-krok;
+  %f8 = func(x, y);
+  wektortestowy = [wektortestowy; func(x,y), pocz(1,i)-krok, pocz(2,i)-krok];
+  
+  %%%%%%%%%%%%%%po³nocny wschod %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  
+  x = pocz(1,i)-krok;
+  y = pocz(2,i)+krok;
+  %f9 = func(x, y);
+  wektortestowy = [wektortestowy; func(x,y), pocz(1,i)-krok, pocz(2,i)+krok];
+
+  
+  %%%% dla ostatniej funkcji dodatni 2 razy krok
+
+  
+  x = pocz(1,i)+20*krok;
+  y = pocz(2,i);
+  %f9 = func(x, y);
+  wektortestowy = [wektortestowy; func(x,y), pocz(1,i)+20*krok, pocz(2,i)];
 
 
-i = i+1
-
+ 
+  minn = min(wektortestowy(2:end,1)); % wartosc najmniejsza z 1 kolumny macierzy
+  func(pocz(1,i),pocz(2,i))
+  
+  %if(minn < func(pocz(1,i),pocz(2,i)))
+     
+  if(minn == wektortestowy(2,1))
+      if (~strcmp(num2str(wektortestowy(2,[2 3])),num2str(wektortestowy(1,[2 3]))))
+      pocz(1,i) = pocz(1,i)+krok;
+      pocz(2,i) = pocz(2,i);
+      %f1=f2;
+      wektortestowy = wektortestowy(2,:); % czyszczenie macierzy i przypisanie miejca i-1
+      end
+      
+  elseif(minn == wektortestowy(3,1))
+      if (~strcmp(num2str(wektortestowy(3,[2 3])),num2str(wektortestowy(1,[2 3]))))
+      pocz(1,i) = pocz(1,i);
+      pocz(2,i) = pocz(2,i)+krok;
+      wektortestowy = wektortestowy(3,:);
+      end
+      
+      
+  elseif(minn == wektortestowy(4,1))
+      if (~strcmp(num2str(wektortestowy(4,[2 3])),num2str(wektortestowy(1,[2 3]))))
+      pocz(1,i) = pocz(1,i)-krok;
+      pocz(2,i) = pocz(2,i);
+      %f1=f4;
+      wektortestowy = wektortestowy(4,:);
+      end
+  elseif(minn == wektortestowy(5,1))
+      if (~strcmp(num2str(wektortestowy(5,[2 3])),num2str(wektortestowy(1,[2 3]))))
+      pocz(1,i) = pocz(1,i);
+      pocz(2,i) = pocz(2,i) - krok;
+      %f1=f5;
+      wektortestowy = wektortestowy(5,:);
+      end
+  elseif(minn == wektortestowy(6,1))
+      if (~strcmp(num2str(wektortestowy(6,[2 3])),num2str(wektortestowy(1,[2 3]))))
+      %pocz(1,i) = pocz(1,i)+krok;
+      %pocz(2,i) = pocz(2,i)-krok;
+      %f1=f5;
+      wektortestowy = wektortestowy(6,:); 
+      end
+     elseif(minn == wektortestowy(7,1))
+      if (~strcmp(num2str(wektortestowy(7,[2 3])),num2str(wektortestowy(1,[2 3]))))
+      pocz(1,i) = pocz(1,i)+ krok;
+      pocz(2,i) = pocz(2,i)+krok;
+      wektortestowy = wektortestowy(7,:); 
+      end
+       elseif(minn == wektortestowy(8,1))
+      if (~strcmp(num2str(wektortestowy(8,[2 3])),num2str(wektortestowy(1,[2 3]))))
+      pocz(1,i) = pocz(1,i)- krok;
+      pocz(2,i) = pocz(2,i)-krok;
+      wektortestowy = wektortestowy(8,:); 
+      end
+     elseif(minn == wektortestowy(9,1))
+      if (~strcmp(num2str(wektortestowy(9,[2 3])),num2str(wektortestowy(1,[2 3]))))
+      pocz(1,i) = pocz(1,i)- krok;
+      pocz(2,i) = pocz(2,i)+krok;
+      wektortestowy = wektortestowy(9,:); 
+      end
+     elseif(minn == wektortestowy(10,1))
+      if (~strcmp(num2str(wektortestowy(10,[2 3])),num2str(wektortestowy(1,[2 3]))))
+      pocz(1,i) = pocz(1,i)+20*krok;
+      pocz(2,i) = pocz(2,i);
+      wektortestowy = wektortestowy(10,:); 
+      end
+  end
+    pocz =[pocz [wektortestowy(2);wektortestowy(3)]]; 
+    i = i+1;
+    krok = krok/2
+    continue
 end
 
-% https://www.youtube.com/watch?v=sXUf5kx2Gi8&t=200s
+if(func(pocz(1,i),pocz(2,i)) == 0)
+   pocz = [pocz [pocz(1,i)+20*krok;pocz(1,i)+20*krok]];
+   i = i+1;
+else
+    pocz =[pocz rozwiazanie];
+    i = i+1;
+end
+
+end
+%pocz = rozwiazanie
+rozwiazanie = func(pocz(1,i), pocz(2,i))
+
+
+end
+%rozwiazane = func(rozwiazanie(1),rozwiazanie(2));
+
+% for i=1:length(pocz)-1
+%     line([pocz(1,i),pocz(1,i+1)],[pocz(2,i),pocz(2,i+1)])
+% end
+%  
