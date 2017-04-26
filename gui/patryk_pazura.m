@@ -22,7 +22,7 @@ function varargout = patryk_pazura(varargin)
 
 % Edit the above text to modify the response to help patryk_pazura
 
-% Last Modified by GUIDE v2.5 24-Apr-2017 23:50:04
+% Last Modified by GUIDE v2.5 25-Apr-2017 19:51:32
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -71,7 +71,7 @@ function varargout = patryk_pazura_OutputFcn(hObject, eventdata, handles)
 
 % Get default command line output from handles structure
 varargout{1} = handles.output;
-axes(handles.axes1)
+%axes(handles.axes1)
 
 
 function edit1_Callback(hObject, eventdata, handles)
@@ -89,18 +89,28 @@ function pushbutton1_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
 a1 = get(handles.edit1,'String');
 xp = get(handles.edit3,'String');
 xk = get(handles.edit4,'String');
 yp = get(handles.edit5,'String');
 yk = get(handles.edit6,'String');
-[i pocz roz] = gradient_prosty(a1,xp,xk,yp,yk);
-set(handles.text4,'String',i)
-set(handles.text3,'String',roz)
+
+px = get(handles.edit7,'String');
+py = get(handles.edit8,'String');
+
 xp = str2num(xp);
 xk = str2num(xk);
 yp = str2num(yp);
 yk = str2num(yk);
+px = str2num(px);
+py = str2num(py);
+
+[i pocz roz] = gradient_prosty(a1,xp,xk,yp,yk,px,py);
+endpocz = length(pocz);
+set(handles.text4,'String',i);
+set(handles.text3,'String',roz);
+
 [x,y] = meshgrid([xp:0.1:xk],[yp:0.1:yk]);
 subplot(2,2,2);
 z = str2func(['@(x,y)',a1]);
@@ -112,7 +122,8 @@ for i=1:length(pocz)-1
      line([pocz(1,i),pocz(1,i+1)],[pocz(2,i),pocz(2,i+1)])
 end
 
-
+set(handles.text5,'String',pocz(1,endpocz));
+set(handles.text6,'String',pocz(2,endpocz));
 
 function edit3_Callback(hObject, eventdata, handles)
 % hObject    handle to edit3 (see GCBO)
@@ -195,6 +206,52 @@ function edit6_Callback(hObject, eventdata, handles)
 % --- Executes during object creation, after setting all properties.
 function edit6_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to edit6 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit7_Callback(hObject, eventdata, handles)
+% hObject    handle to edit7 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit7 as text
+%        str2double(get(hObject,'String')) returns contents of edit7 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit7_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit7 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit8_Callback(hObject, eventdata, handles)
+% hObject    handle to edit8 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit8 as text
+%        str2double(get(hObject,'String')) returns contents of edit8 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit8_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit8 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
